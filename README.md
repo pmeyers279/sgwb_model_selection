@@ -36,7 +36,14 @@ export ATLAS=/usr/lib64/libatlas.so
 export BLAS=/usr/lib64/libblas.so
 export LD_LIBRARY_PATH=${MULTINEST_BASE}/MultiNest/lib/:$LD_LIBRARY_PATH
 ```
-where `${MULTINEST_BASE}` is the base directory for wherever you downloaded multinest
+where `${MULTINEST_BASE}` is the base directory for wherever you downloaded multinest.
+
+5. If you're on a mac...
+You have to move a library to the lib/ of your python installation (and...change its name?), then set an environment variable properly. For me that was
+```
+mv ${MULTINEST_BASE}/lib/libmultinest.3.10.dylib ~/opt/sbms/lib/libmultinest.dylib
+export DYLD_LIBRARY_PATH=~/opt/sbms/lib/
+```
 
 ## Run a single power law model
 ```python

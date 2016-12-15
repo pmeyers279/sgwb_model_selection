@@ -11,7 +11,7 @@ from sbms.io import read_ini
 # get input distribution: two power laws
 # each with 1e-9 for omega_alpha
 # one with alpha=3, one with alpha=0
-params = read_ini('sbms/tests/data/test_ini.ini')
+params = read_ini('../sbms/tests/data/test_ini.ini')
 omega_gw, f = omgwf(params)
 
 def prior(cube, ndim, nparams):
@@ -68,7 +68,7 @@ def loglike(cube, ndim, nparams):
 parameters = ["omg_alpha1", "alpha1", "omg_alpha2","alpha2"]
 n_params = len(parameters)
 pymultinest.run(loglike, prior, n_params, outputfiles_basename='out/test_1_',
-        resume=False, verbose=True, n_live_points=400)
+        resume=False, verbose=True, n_live_points=1000)
 json.dump(parameters, open('out/test_1_params.json','w'))
 a = pymultinest.Analyzer(outputfiles_basename='out/test_1_', n_params = n_params)
 a_lnZ = a.get_stats()['global evidence']
