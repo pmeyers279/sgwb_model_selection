@@ -1,5 +1,7 @@
 # SGWB model selection project
 
+[![Build Status](https://travis-ci.org/pmeyers279/sgwb_model_selection.svg?branch=master)](https://travis-ci.org/pmeyers279/sgwb_model_selection)
+
 ## Installation
 
 1. clone this repo
