@@ -15,7 +15,7 @@ pip install .
 ```
 
 ## Run a few power law models from a config file
-Create a config file with specific parameters for your model (and make sure you use the right names...right now you'll have to look in the code for these). We can add a few power law models.
+Create a config file with specific parameters for your model (and make sure you use the right names...right now you'll have to look in the code for these). We can add a few power law models. Right now fractions aren't supported for spectral indices. Sorry!
 
 ```ini
 [power law]
@@ -24,7 +24,7 @@ alpha=3
 
 [power law]
 omega_alpha=1e-7
-alpha=2/3
+alpha=0.6667
 ```
 
 Run a model from a file:

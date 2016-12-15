@@ -27,23 +27,23 @@ def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
     if isinstance(omg_alpha, dict):
         # unpack params
         try:
-            flow = omg_alpha['flow']
+            flow = float(omg_alpha['flow'])
         except:
             pass
         try:
-            fhigh = omg_alpha['fhigh']
+            fhigh = float(omg_alpha['fhigh'])
         except:
             pass
         try:
-            df = omg_alpha['df']
+            df = float(omg_alpha['df'])
         except:
             pass
         try:
-            alpha=omg_alpha['alpha']
+            alpha=float(omg_alpha['alpha'])
         except:
             pass
         try:
-            fref = omg_alpha['fref']
+            fref = float(omg_alpha['fref'])
         except:
             pass
         try:
