@@ -4,11 +4,39 @@
 
 ## Installation
 
-1. clone this repo
+### Install this package
+
+1. clone or fork this repo
 ```python
 cd sgwb_model_selection
 pip install .
 ```
+
+### Install MultiNest
+
+2. Install gcc, cmake if not already installed. 
+
+On OS X with macports:
+```bash
+sudo port install cmake gcc6
+export FC=/opt/local/bin/gfortran-mp-6
+```
+
+3. Install MultiNest
+```
+git clone https://github.com/JohannesBuchner/MultiNest.git
+cd MultiNest/build
+cmake .. && make
+```
+
+4. Make sure that the libraries are available. Set these environment variables somewhere
+```bash
+export LAPACK=/usr/lib64/liblapack.so
+export ATLAS=/usr/lib64/libatlas.so
+export BLAS=/usr/lib64/libblas.so
+export LD_LIBRARY_PATH=${MULTINEST_BASE}/MultiNest/lib/:$LD_LIBRARY_PATH
+```
+where `${MULTINEST_BASE}` is the base directory for wherever you downloaded multinest
 
 ## Run a single power law model
 ```python
