@@ -8,11 +8,15 @@ omgw_f_registry = {'power law' : pl_omgwf}
 def omgwf(params):
     First = True
     for model in params.keys():
+        if model[-2]=='_':
+            modname=model[:-2]
+        else:
+            modname=model
         if First:
-            omgwf,f = omgw_f_registry[model](params[model])
+            omgwf,f = omgw_f_registry[modname](params[model])
             First = False
         else:
             print 'HI'
-            omgwf_temp,f = omgw_f_registry[model](params[model])
+            omgwf_temp,f = omgw_f_registry[modname](params[model])
             omgwf += omgwf_temp
     return omgwf, f
