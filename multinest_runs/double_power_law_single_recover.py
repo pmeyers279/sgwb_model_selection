@@ -34,8 +34,6 @@ def prior(cube, ndim, nparams):
     """
     cube[0] = cube[0]*1e-8 # omega_alpha for model 1
     cube[1] = cube[1]*10 - 5 # alpha for model 1
-    cube[2] = cube[2]*1e-8 # omega_alpha for model 2
-    cube[3] = cube[3]*(5-cube[1]) + cube[1]
 
 
 def loglike(cube, ndim, nparams):
@@ -58,20 +56,18 @@ def loglike(cube, ndim, nparams):
         of values chosen from the priors for each
         variable
     """
-    omg_alpha1, alpha1, omg_alpha2, alpha2 = cube[0], cube[1], cube[2], cube[3]
+    omg_alpha1, alpha1 = cube[0], cube[1]
     omgw_model,f = power_law.omega_gw_spectrum(omg_alpha1, alpha1, fref=100)
-    omgw_model2,f = power_law.omega_gw_spectrum(omg_alpha2, alpha2, fref=100)
-    omgw_model += omgw_model2
     sigma = omega_gw / 10
     return -(np.sum((omgw_model - omega_gw)**2 / (2*sigma**2)))
 
 
-parameters = ["omg_alpha1", "alpha1", "omg_alpha2","alpha2"]
+parameters = ["omg_alpha1", "alpha1"]
 n_params = len(parameters)
-pymultinest.run(loglike, prior, n_params, outputfiles_basename='out/test_2_',
+pymultinest.run(loglike, prior, n_params, outputfiles_basename='out/test_1_',
         resume=False, verbose=True, n_live_points=2000)
-json.dump(parameters, open('out/test_2_params.json','w'))
-a = pymultinest.Analyzer(outputfiles_basename='out/test_2_', n_params = n_params)
+json.dump(parameters, open('out/test_1_params.json','w'))
+a = pymultinest.Analyzer(outputfiles_basename='out/test_1_', n_params = n_params)
 a_lnZ = a.get_stats()['global evidence']
 print
 print '************************'

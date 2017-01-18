@@ -1,7 +1,8 @@
 import ConfigParser
+from collections import OrderedDict
 
 def config_section_map(c, section):
-    dict1 = {}
+    dict1 = OrderedDict()
     options = c.options(section)
     for option in options:
         dict1[option] = c.get(section, option).strip()
