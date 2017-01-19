@@ -59,8 +59,31 @@ param4=alpha2,U,-5,0
 ### Available models:
 Available models: 
 
+Right now everything just runs from 20-100 Hz and for the power law fref defaults to 20 Hz. As soon as I work out how best to properly handle passing keyword arguments and optional arguments to the models, I'll add in the ability to change the frequency range.
+
+Recall that the arguments below are explicit parameters set in the injection file and then for the recovery file, they are (in the order presented below) the params that need to be specified.
+
 * `power law`
+```
+omg_alpha : `float`
+    :math:`\Omega_{\alpha}`, amplitude for power spectrum
+alpha : `float`
+    spectral index
+```
 * `broken power law`
+```
+omg_ref : `float`
+    :math:`\Omega_{\alpha}`, amplitude for power spectrum at the cross-over
+    from one power law to the other
+f_break : `float`
+    frequency at which cross-over occurs
+alpha1 : `float`
+    power law index for first section
+alpha2 : `float`
+    power law index for second section
+```
+
+
 
 ### Available Priors:
 Type : `Key` [params]
