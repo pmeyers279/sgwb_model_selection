@@ -1,0 +1,42 @@
+#! /usr/bin/python
+from sbms.engine import engine
+from sbms.marginals import marginals
+import os
+import optparse
+
+def parse_command_line():
+    """
+    parse command line
+    """
+    parser = optparse.OptionParser()
+    parser.add_option("--injection-file", "-i",
+        help="injection param file", default=None,
+        dest="inj_file", type=str)
+    parser.add_option("--recovery-file", "-r",
+        help="recovery param file", default=None,
+        dest="recovery_file", type=str)
+    parser.add_option("--output-prefix", "-o",
+        help="output prefix. path needs to exist right now.",
+        default='./multinest_files_',
+        dest="output_pref", type=str)
+    params, args = parser.parse_args()
+    return params
+
+if __name__=="__main__":
+    params = parse_command_line()
+    # run multinest first
+    if not os.path.exists(params.inj_file):
+        raise IOError('Your injection file doesnt exist!')
+    if not os.path.exists(params.recovery_file):
+        raise IOError('Your recovery file doesnt exist!')
+    if not os.path.exists(os.path.dirname(params.output_pref)):
+        raise IOError("""The directory where you want to save things doesnt
+                exist yet!""")
+    engine(params.inj_file, params.recovery_file, params.output_pref)
+    print '=============================='
+    print 'DONE RUNNING MULTINEST        '
+    print ''
+    print 'RUNNING MULTINEST MARGINALS   '
+    print '=============================='
+    # run multinest marginals as well
+    marginals(params.output_pref)

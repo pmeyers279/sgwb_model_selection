@@ -1,5 +1,5 @@
 import unittest
-from ..io import read_ini
+from ..io_sbms import read_ini
 from ..models import *
 
 class TestModel(unittest.TestCase):
