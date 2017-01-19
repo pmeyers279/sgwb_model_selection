@@ -17,7 +17,7 @@ def config_list(c):
 
 
 def config_pipeline_ini(c):
-    dict1 = {}
+    dict1 = OrderedDict()
     for section in c.sections():
         dict1[section] = config_section_map(c, section)
     return dict1

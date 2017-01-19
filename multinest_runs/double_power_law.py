@@ -4,15 +4,16 @@ matplotlib.use('agg')
 import numpy as np
 import pymultinest
 import json
-from sbms.models import omgwf
+from sbms.models import omgwf, ptEst_sigma
 from sbms.models import power_law
 from sbms.io import read_ini
+from sbms.orfs import ORF
 
 # get input distribution: two power laws
 # each with 1e-9 for omega_alpha
 # one with alpha=3, one with alpha=0
 params = read_ini('../sbms/tests/data/test_ini.ini')
-omega_gw, f = omgwf(params)
+Y, sig2, f = ptEst_sigma(params)
 
 def prior(cube, ndim, nparams):
     """
@@ -59,11 +60,12 @@ def loglike(cube, ndim, nparams):
         variable
     """
     omg_alpha1, alpha1, omg_alpha2, alpha2 = cube[0], cube[1], cube[2], cube[3]
-    omgw_model,f = power_law.omega_gw_spectrum(omg_alpha1, alpha1, fref=100)
-    omgw_model2,f = power_law.omega_gw_spectrum(omg_alpha2, alpha2, fref=100)
-    omgw_model += omgw_model2
-    sigma = omega_gw / 10
-    return -(np.sum((omgw_model - omega_gw)**2 / (2*sigma**2)))
+    # model
+    Y_model, f = power_law.get_data(omg_alpha1, alpha1, fref=100)
+    Y_model2, f = power_law.get_data(omg_alpha2, alpha2, fref=100)
+    Y_model += Y_model2
+    # Y and sigma (global) are our variables
+    return -(np.sum((Y_model - Y)**2 / (2*sig2)))
 
 
 parameters = ["omg_alpha1", "alpha1", "omg_alpha2","alpha2"]

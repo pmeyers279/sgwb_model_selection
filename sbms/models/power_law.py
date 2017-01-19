@@ -1,4 +1,6 @@
 import numpy as np
+from ..noise import get_noise_psd
+from ..orfs import ORF
 
 def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
     """
@@ -54,3 +56,4 @@ def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
 
     f = np.arange(flow, fhigh+df, df)
     return omg_alpha * (f/fref)**alpha, f
+

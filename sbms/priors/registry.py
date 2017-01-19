@@ -1,4 +1,4 @@
-from ..io import read_ini
+from ..io_sbms import read_ini
 from .priors import *
 
 def get_model_params(ini_file):

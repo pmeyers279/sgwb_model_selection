@@ -1,5 +1,5 @@
 import unittest
-from ..io import read_ini
+from ..io_sbms import read_ini
 from ..models import *
 
 class TestModel(unittest.TestCase):
@@ -7,8 +7,6 @@ class TestModel(unittest.TestCase):
         params = read_ini('sbms/tests/data/test_ini.ini')
         print params
         omgw_f,f = power_law.omega_gw_spectrum(1e-9, alpha=0)
-        omgw_f2,f = omgwf(params)
-        print omgw_f
-        print omgw_f2
+#        omgw_f2,f = omgwf(params)
 if __name__=="__main__":
     unittest.main()
