@@ -36,10 +36,10 @@ if __name__=="__main__":
     engine('examples/injection_broken_power_law.ini','examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
     print 'Running power law recovery'
     print 'Results here: %s' % output_pref_pl
-#    engine('examples/injection_broken_power_law.ini','examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
+    engine('examples/injection_broken_power_law.ini','examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
     print 'Running noise recovery'
     print 'Results here: %s' % output_pref_noise
-#    engine('examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
+    engine('examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
     print 'Done running Multinest'
     print 'Collecting output'
     marginals(output_pref_pl)
