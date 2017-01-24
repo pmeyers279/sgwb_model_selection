@@ -7,6 +7,7 @@ from sbms.marginals import marginals
 import json
 import optparse
 import numpy as np
+from jinja2 import Environment, PackageLoader
 
 
 def parse_command_line():
@@ -33,13 +34,13 @@ if __name__=="__main__":
     # run things
     print 'Running broken power law recovery'
     print 'Results here: %s' % output_pref_bpl
-    engine('examples/injection_broken_power_law.ini','examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
+#    engine('examples/injection_broken_power_law.ini','examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
     print 'Running power law recovery'
     print 'Results here: %s' % output_pref_pl
-    engine('examples/injection_broken_power_law.ini','examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
+#    engine('examples/injection_broken_power_law.ini','examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
     print 'Running noise recovery'
     print 'Results here: %s' % output_pref_noise
-    engine('examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
+#    engine('examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
     print 'Done running Multinest'
     print 'Collecting output'
     marginals(output_pref_pl)
@@ -68,3 +69,14 @@ if __name__=="__main__":
     print 'log Bayes Factor of power law to noise: '
     print  (pl_evidence - noise_evidence)
     print 'DONE!'
+    results = {}
+    results['bpl'] = {'evidence' : bpl_evidence, 'marg' : output_pref_bpl + 'marg.png', 'name':'Broken Power Law'}
+    results['pl'] = {'evidence' : pl_evidence, 'marg' : output_pref_pl + 'marg.png', 'name':'Power Law'}
+    results['noise'] = {'evidence' : noise_evidence, 'marg' : output_pref_noise + 'marg.png', 'name':'Noise'}
+    results['injection'] = {'name': 'Broken Power Law', 'data_plots' : output_pref_bpl + 'input_data.png'}
+    env = Environment(loader=PackageLoader('sbms','templates'))
+    template = env.get_template('summary.html')
+    f1 = open(params.output_dir + '/summary.html', 'w')
+    print >>f1, template.render(results=results)
+    f1.close()
+
