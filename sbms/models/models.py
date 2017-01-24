@@ -28,7 +28,7 @@ def omgwf(params):
             except KeyError:
                 spectrum_type='psd'
             sig2 =\
-                get_sigma_from_noise(int(params['noise']['Tobs']),params['noise']['noise_str'],
+                get_sigma_from_noise(float(params['noise']['Tobs']),params['noise']['noise_str'],
                 outfs=f, format=str_format, type=spectrum_type)
             First = False
         else:
