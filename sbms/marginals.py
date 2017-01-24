@@ -63,7 +63,7 @@ def marginals(prefix):
             for i in range(n_params):
 
                     ax1 = fig.add_subplot(n_params, n_params, n_params*i+(i+1))
-                    ax1.set_xlabel(parameters[i])
+                    ax1.set_xlabel(parameters[i].replace('_','\_'))
             
                     # Get parameter statistics, set bounds to +/- 5sigma
                     m = s['marginals'][i]
@@ -101,8 +101,8 @@ def marginals(prefix):
                                             yerr=m['sigma'][j])
 
                             # Axes labels
-                            ax2.set_xlabel(parameters[i])
-                            ax2.set_ylabel(parameters[j])
+                            ax2.set_xlabel(parameters[i].replace('_','\_'))
+                            ax2.set_ylabel(parameters[j].replace('_','\_'))
 
             # Save figure
             plt.savefig(prefix + 'marg.pdf')
@@ -122,7 +122,7 @@ def marginals(prefix):
             for i in range(n_params):
 
                     plt.figure(figsize=(3, 3))
-                    plt.xlabel(parameters[i])
+                    plt.xlabel(parameters[i].replace('_','\_'))
                     plt.locator_params(nbins=5)
 
                     m = s['marginals'][i]

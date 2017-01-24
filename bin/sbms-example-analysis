@@ -1,0 +1,82 @@
+#! /usr/bin/python
+from matplotlib import use
+use('agg')
+import pymultinest
+from sbms.engine import engine
+from sbms.marginals import marginals
+import json
+import optparse
+import numpy as np
+from jinja2 import Environment, PackageLoader
+
+
+def parse_command_line():
+    """
+    parse command line
+    """
+    parser = optparse.OptionParser()
+    parser.add_option("--output-directory", "-o",
+        help="output prefix. path needs to exist right now.",
+        default='./',
+        dest="output_dir", type=str)
+    params, args = parser.parse_args()
+    return params
+
+
+if __name__=="__main__":
+    params = parse_command_line()
+    output_pref_bpl = params.output_dir + 'broken_power_law_'
+    output_pref_pl = params.output_dir + 'power_law_'
+    output_pref_noise = params.output_dir + 'noise_'
+
+    seed = 12345
+    # get evidences
+    # run things
+    print 'Running broken power law recovery'
+    print 'Results here: %s' % output_pref_bpl
+    engine('examples/injection_broken_power_law.ini','examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
+    print 'Running power law recovery'
+    print 'Results here: %s' % output_pref_pl
+    engine('examples/injection_broken_power_law.ini','examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
+    print 'Running noise recovery'
+    print 'Results here: %s' % output_pref_noise
+    engine('examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
+    print 'Done running Multinest'
+    print 'Collecting output'
+    marginals(output_pref_pl)
+    marginals(output_pref_bpl)
+#    marginals(output_pref_noise)
+
+    bpl_evidence = pymultinest.Analyzer(n_params = 4, outputfiles_basename = output_pref_bpl).get_stats()['global evidence']
+    pl_evidence = pymultinest.Analyzer(n_params = 2, outputfiles_basename = output_pref_pl).get_stats()['global evidence']
+    noise_evidence = json.load(open(output_pref_noise + 'stats.json'))['global evidence']
+
+    print 'Broken power law evidence'
+    print bpl_evidence
+
+    print 'Power law evidence'
+    print pl_evidence
+
+    print 'Noise law evidence'
+    print noise_evidence
+
+    print 'log Bayes Factor of broken power law to noise: '
+    print (bpl_evidence - noise_evidence)
+
+    print 'log Bayes Factor of broken power law to power law '
+    print (bpl_evidence - pl_evidence)
+
+    print 'log Bayes Factor of power law to noise: '
+    print  (pl_evidence - noise_evidence)
+    print 'DONE!'
+    results = {}
+    results['bpl'] = {'evidence' : bpl_evidence, 'marg' : output_pref_bpl + 'marg.png', 'name':'Broken Power Law'}
+    results['pl'] = {'evidence' : pl_evidence, 'marg' : output_pref_pl + 'marg.png', 'name':'Power Law'}
+    results['noise'] = {'evidence' : noise_evidence, 'marg' : output_pref_noise + 'marg.png', 'name':'Noise'}
+    results['injection'] = {'name': 'Broken Power Law', 'data_plots' : output_pref_bpl + 'input_data.png'}
+    env = Environment(loader=PackageLoader('sbms','templates'))
+    template = env.get_template('summary.html')
+    f1 = open(params.output_dir + '/summary.html', 'w')
+    print >>f1, template.render(results=results)
+    f1.close()
+

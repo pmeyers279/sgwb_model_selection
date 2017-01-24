@@ -28,14 +28,16 @@ The header for the model should end in an `_#` and the rest of the header should
 
 ```ini
 [noise]
-noise_str=-A
-Tobs=1
+noise_str=examples/asd.txt ;; path to noise file or lalsim detector flag
+spectrum_type=asd ;; is the file an asd or a psd?
+format=file ;; is this a file thatyou're submitting or a lalsim-detector-noise flag?
+Tobs=1 ;; observation time in years
 
 [broken power law_1]
-omg_ref=1e-6
-alpha1=3
-alpha2=-3
-f_break=50
+omg_ref=1e-6 ;; Omega_GW at the break in the power law
+alpha1=3 ;; power law index up to f_break
+alpha2=-3 ;; power law index after f_break
+f_break=50 ;; break frequency of power law
 ```
 
 ### Recovery File `-r`
@@ -47,8 +49,8 @@ Each param slot is a comma separated list. The first is the name that will appea
 
 ```
 [1]
-model_type=broken_power_law
-nparams=4
+model_type=broken_power_law ;; this is a 'broken power law' recovery
+nparams=4 ;; 4 parameters
 ;; 'name','prior type','input 1', 'input 2'
 param1=omg_ref,LOG,1e-8,1e-5
 param2=f_break,U,20,100

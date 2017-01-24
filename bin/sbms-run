@@ -27,16 +27,17 @@ if __name__=="__main__":
     # run multinest first
     if not os.path.exists(params.inj_file):
         raise IOError('Your injection file doesnt exist!')
-    if not os.path.exists(params.recovery_file):
-        raise IOError('Your recovery file doesnt exist!')
+    if not os.path.exists(params.recovery_file) and not params.recovery_file=='noise':
+        raise IOError('Your recovery file %s doesnt exist!' % params.recovery_file)
     if not os.path.exists(os.path.dirname(params.output_pref)):
         raise IOError("""The directory where you want to save things doesnt
                 exist yet!""")
     engine(params.inj_file, params.recovery_file, params.output_pref)
-    print '=============================='
-    print 'DONE RUNNING MULTINEST        '
-    print ''
-    print 'RUNNING MULTINEST MARGINALS   '
-    print '=============================='
-    # run multinest marginals as well
-    marginals(params.output_pref)
+    if not params.recovery_file=='noise':
+        print '=============================='
+        print 'DONE RUNNING MULTINEST        '
+        print ''
+        print 'RUNNING MULTINEST MARGINALS   '
+        print '=============================='
+        # run multinest marginals as well
+        marginals(params.output_pref)

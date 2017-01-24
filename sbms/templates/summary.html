@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html lang="en">
+        <head>
+                <link media="all" href="main.css" type="text/css" rel="stylesheet" />
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+                <!-- Latest compiled and minified CSS -->
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+                <!-- Optional theme -->
+                <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+                <!-- Latest compiled and minified JavaScript -->
+                <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.1/css/bootstrap-datepicker.css">
+                <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.1/js/bootstrap-datepicker.js"></script>
+        </head>
+        <body>
+                <div class="panel-body">
+                        <div class="panel panel-warning">
+                                <div class="panel-heading">
+                                        <h2> {{results['injection']['name']}} Injected</h2>
+                                </div>
+                                <div class="panel-body">
+                                        <img src="{{results['injection']['data_plots']}}", width=25%>
+                                </div>
+                                {% for key in results.keys() %}
+                                {% if key!='noise'%}
+                                {% if key!='injection'%}
+                                <div class="panel panel-warning">
+                                        <div class="panel-heading">
+                                                <h2> {{results[key]['name']}} Recovery </h2 >
+                                        </div>
+                                        <div class="panel-body">
+                                                {% for key2 in results.keys() %}
+                                                {% if key2!=key %}
+                                                {% if key2!='injection' %}
+                                                <p> log Bayes-factor {{results[key]['name']}} vs. {{results[key2]['name']}} : {{results[key]['evidence']-results[key2]['evidence']}}</p>
+                                                {% endif %}
+                                                {% endif %}
+                                                {% endfor %}
+                                                <img src="{{results[key]['marg']}}", width=50%>
+                                        </div>
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                        </div>
+                </div>
+        </body>
