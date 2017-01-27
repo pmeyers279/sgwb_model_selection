@@ -26,34 +26,18 @@ def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
     f : `numpy.ndarray`
         frequency array
     """
-    if isinstance(omg_alpha, dict):
-        # unpack params
-        try:
-            flow = float(omg_alpha['flow'])
-        except:
-            pass
-        try:
-            fhigh = float(omg_alpha['fhigh'])
-        except:
-            pass
-        try:
-            df = float(omg_alpha['df'])
-        except:
-            pass
-        try:
-            alpha=float(omg_alpha['alpha'])
-        except:
-            pass
-        try:
-            fref = float(omg_alpha['fref'])
-        except:
-            pass
-        try:
-            omg_alpha2=float(omg_alpha['omg_alpha'])
-            omg_alpha = omg_alpha2
-        except:
-            raise ValueError('Must specify Omega_alpha for power law model')
-
     f = np.arange(flow, fhigh+df, df)
-    return omg_alpha * (f/fref)**alpha, f
+    return 10**omg_alpha * (f/fref)**alpha, f
+
+def unpack_dict(param_dict):
+    kwargs = {}
+    args = []
+    try:
+        args.append(float(param_dict.pop('omg_alpha')))
+    except:
+        raise ValueError('Must specify Omega_alpha for power law model')
+    for key in param_dict.keys():
+        if key != 'frequencies':
+            param_dict[key] = float(param_dict[key])
+    return args, param_dict
 

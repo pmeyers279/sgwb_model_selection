@@ -11,11 +11,12 @@ from numpy import exp, log
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+from sbms.priors import add_prior
 import sys, os
 import json
 import pymultinest
 
-def marginals(prefix):
+def marginals(prefix, params):
     print('model "%s"' % prefix)
     parameters = json.load(open(prefix + 'params.json'))
     n_params = len(parameters)
@@ -60,19 +61,23 @@ def marginals(prefix):
             fig = plt.figure(figsize=(5*n_params, 5*n_params))
 
             # Loop across parameters, create 1D plot
+            counter = 0
             for i in range(n_params):
+                    par = params['1']['param'+str(i+1)]
+                    sp = par.split(',')
 
                     ax1 = fig.add_subplot(n_params, n_params, n_params*i+(i+1))
                     ax1.set_xlabel(parameters[i].replace('_','\_'))
-            
+
                     # Get parameter statistics, set bounds to +/- 5sigma
                     m = s['marginals'][i]
-            
+
                     # Histogram posterior
                     x,w,patches = ax1.hist(values[:,i], bins=nbins, edgecolor='black', color='mediumslateblue',\
                             histtype='stepfilled', alpha=0.2,normed=True)
+                    add_prior(ax1,sp[1],float(sp[2]),float(sp[3]))
                     ax1.set_ylim(0, x.max())
-            
+
                     # y-value at which to place error-bar (1/20th of vertical extent)
                     ylim = ax1.get_ylim()
                     y = ylim[0] + 0.05*(ylim[1] - ylim[0])

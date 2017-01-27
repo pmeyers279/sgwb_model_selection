@@ -11,7 +11,7 @@ def get_model_params(ini_file):
 
 
 
-def prior_maker(cube, ndim, nparams, params=None):
+def prior_maker(cube, ndim, nparams):
     counter = 0
     registry = {}
     for model in params.keys():

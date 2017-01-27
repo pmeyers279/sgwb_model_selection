@@ -14,7 +14,7 @@ from sbms.models import omgwf, omgw_f_registry
 from sbms.models import power_law
 from sbms.io_sbms import read_ini
 from sbms.orfs import ORF
-from sbms.priors.priors import GeneralPrior
+from sbms.priors import GeneralPrior
 import optparse
 
 def parse_command_line():
@@ -65,10 +65,10 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
             alpha=0.3)
     ax1.set_yscale('log')
     ax1.set_xscale('log')
-    ax2 = ax1.twinx()
-    ax2.plot(f, (Omgw) / np.sqrt(sig2), label='$SNR$', linewidth=2,
-            alpha=0.3, color='red')
-    ax2.set_xlim(f.min(), f.max())
+#    ax2 = ax1.twinx()
+#    ax2.plot(f, (Omgw) / np.sqrt(sig2), label='$SNR$', linewidth=2,
+#            alpha=0.3, color='red')
+#    ax2.set_xlim(f.min(), f.max())
     plt.title('Broadband $\Omega_{gw}$ = %4.2e, SNR=%4.2f' % (Y_tot,
         Y_tot/sig_tot))
     plt.legend()
@@ -167,7 +167,6 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
                 counter += nparams
         return -(np.sum((Y_model - Omgw)**2 / (2*sig2))) - 0.5*np.sum(np.log(2.*np.pi*sig2))
 
-    #parameters = ["omg_alpha1", "alpha1", "omg_alpha2","alpha2"]
     n_params = len(parameters)
     pymultinest.run(loglike, prior, n_params,
             outputfiles_basename=output_prefix,
@@ -206,4 +205,5 @@ if __name__=="__main__":
     print 'RUNNING MULTINEST MARGINALS   '
     print '=============================='
     # run multinest marginals as well
-    marginals(params.output_pref)
+    params2 = read_ini(params.recovery_file)
+    marginals(params.output_pref, params2)
