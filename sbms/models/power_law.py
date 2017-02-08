@@ -2,7 +2,8 @@ import numpy as np
 from ..noise import get_noise_psd
 from ..orfs import ORF
 
-def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
+def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25,
+        frequencies=None):
     """
     Parameters
     ----------
@@ -54,6 +55,8 @@ def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
         except:
             raise ValueError('Must specify Omega_alpha for power law model')
 
-    f = np.arange(flow, fhigh+df, df)
-    return omg_alpha * (f/fref)**alpha, f
+    f = np.arange(float(flow), float(fhigh)+float(df), float(df))
+    if frequencies is not None:
+        f = frequencies
+    return 10**omg_alpha * (f/float(fref))**alpha, f
 

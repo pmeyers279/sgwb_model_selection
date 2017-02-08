@@ -93,7 +93,8 @@ def marginals(prefix):
 
                             # Set up 2D posterior plot
                             ax2 = fig.add_subplot(n_params, n_params, n_params*j+(i+1),sharex=ax1)
-                            p.plot_conditional(i, j, cmap = 'Blues', bins='log')
+                            p.plot_conditional(i, j, cmap = 'Blues',
+                                    bins='log',)
 
                             # Plot error bars for each mode
                             for m in modes:

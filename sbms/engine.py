@@ -12,7 +12,7 @@ import pymultinest
 import json
 from sbms.models import omgwf, omgw_f_registry
 from sbms.models import power_law
-from sbms.io_sbms import read_ini
+from sbms.io_sbms import read_ini, create_kwargs_from_recovery_params
 from sbms.orfs import ORF
 from sbms.priors.priors import GeneralPrior
 import optparse
@@ -43,6 +43,8 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
     # get params
     params = read_ini(injection_file)
     Omgw, sig2, f = omgwf(params)
+    # save this for later
+    frequencies = np.copy(f)
     np.random.seed(noise_seed)
     Omgw += np.random.randn(Omgw.size) * np.sqrt(sig2)
     if recovery_file=='noise':
@@ -162,7 +164,10 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
                 model = params2[key]['model_type']
                 nparams = int(params2[key]['nparams'])
                 args = [cube[i] for i in range(counter,counter+nparams)]
-                Y_temp,f = omgw_f_registry[model.replace('_',' ')](*args)
+                kwargs = create_kwargs_from_recovery_params(params2[key])
+                kwargs['frequencies'] = frequencies
+                Y_temp,f = omgw_f_registry[model.replace('_',' ')](*args,
+                        **kwargs)
                 Y_model += Y_temp
                 counter += nparams
         return -(np.sum((Y_model - Omgw)**2 / (2*sig2))) - 0.5*np.sum(np.log(2.*np.pi*sig2))

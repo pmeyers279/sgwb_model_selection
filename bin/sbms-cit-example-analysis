@@ -8,6 +8,15 @@ import json
 import optparse
 import numpy as np
 from jinja2 import Environment, PackageLoader
+"""
+This is an example script that runs the analysis 3 times:
+        We inject a broken power law each time and we recover it
+        using a broken power law recovery, a power law recovery,
+        and a noise model recovery.
+        This script is meant to be run on the Caltech computing cluster, where
+        the example files live in a home directory.
+THIS SCRIPT IS A WORKING EXAMPLE.
+"""
 
 
 def parse_command_line():
@@ -29,18 +38,23 @@ if __name__=="__main__":
     output_pref_pl = params.output_dir + 'power_law_'
     output_pref_noise = params.output_dir + 'noise_'
 
+    #example files directory
+    # edit this to fit your own needs
+    exdir = '/home/meyers/git_repos/sgwb_model_selection'
+
     seed = 12345
     # get evidences
     # run things
     print 'Running broken power law recovery'
     print 'Results here: %s' % output_pref_bpl
-    engine('examples/injection_broken_power_law.ini','examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
+    # edit these to point to your own paramfiles if you want
+    engine(exdir + 'examples/injection_broken_power_law.ini',exdir + 'examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
     print 'Running power law recovery'
     print 'Results here: %s' % output_pref_pl
-    engine('examples/injection_broken_power_law.ini','examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
+    engine(exdir + 'examples/injection_broken_power_law.ini',exdir + 'examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
     print 'Running noise recovery'
     print 'Results here: %s' % output_pref_noise
-    engine('examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
+    engine(exdir + 'examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
     print 'Done running Multinest'
     print 'Collecting output'
     marginals(output_pref_pl)
