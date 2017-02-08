@@ -1,6 +1,7 @@
 import numpy as np
 
-def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
+def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25,
+        frequencies=None):
     """
     Parameters
     ----------
@@ -24,8 +25,10 @@ def omega_gw_spectrum(omg_alpha, alpha=0, fref=20, flow=20, fhigh=100, df=0.25):
     f : `numpy.ndarray`
         frequency array
     """
-    f = np.arange(flow, fhigh+df, df)
-    return 10**omg_alpha * (f/fref)**alpha, f
+    f = np.arange(float(flow), float(fhigh)+float(df), float(df))
+    if frequencies is not None:
+        f = frequencies
+    return 10**omg_alpha * (f/float(fref))**alpha, f
 
 def unpack_dict(param_dict):
     kwargs = {}
@@ -38,4 +41,3 @@ def unpack_dict(param_dict):
         if key != 'frequencies':
             param_dict[key] = float(param_dict[key])
     return args, param_dict
-

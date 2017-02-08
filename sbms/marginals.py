@@ -112,7 +112,6 @@ def marginals(prefix, params):
                                     # Axes labels
                                     ax2.set_xlabel(parameters[i].replace('_','\_'))
                                     ax2.set_ylabel(parameters[j].replace('_','\_'))
-
             # Save figure
             plt.savefig(prefix + 'marg.pdf')
             plt.savefig(prefix + 'marg.png')

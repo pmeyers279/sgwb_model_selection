@@ -5,7 +5,8 @@ from .broken_power_law import unpack_dict as bpl_params
 from .simple_line import omega_gw_spectrum as sl_omgwf
 from .simple_line import unpack_dict as sl_params
 from ..noise import get_sigma_from_noise
-
+import numpy as np
+from ..noise import get_sigma_from_noise
 
 # dict of omgw_f models
 omgw_f_registry = {'power law' : pl_omgwf,
@@ -27,6 +28,18 @@ def omgwf(params):
             modname=model[:-2]
         else:
             modname=model
+        if model=='data':
+            dat = np.loadtxt(params['data']['file'])
+            f = dat[:,0]
+            if First:
+                omgwf = dat[:,1]
+                sig2 = dat[:,2]**2
+            else:
+                omgwf += dat[:,1]
+                # always override to make
+                # what comes out of the file sigma.
+                sig2 = dat[:,2]**2
+            continue
         if First:
             a,k = param_registry[modname](params[model])
             omgwf,f = omgw_f_registry[modname](*a, **k)

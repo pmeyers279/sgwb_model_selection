@@ -1,6 +1,7 @@
 import numpy as np
 
-def omega_gw_spectrum(omg_ref,f_break=50,alpha1=3,alpha2=-3, flow=20, fhigh=100, df=0.25):
+def omega_gw_spectrum(omg_ref,f_break=50,alpha1=3,alpha2=-3, flow=20,
+        fhigh=100, df=0.25, frequencies=None):
     """
     Parameters
     ----------
@@ -27,7 +28,9 @@ def omega_gw_spectrum(omg_ref,f_break=50,alpha1=3,alpha2=-3, flow=20, fhigh=100,
     f : `numpy.ndarray`
         frequency array
     """
-    f = np.arange(flow, fhigh+df, df)
+    f = np.arange(float(flow), float(fhigh)+float(df), float(df))
+    if frequencies is not None:
+        f = frequencies
     omgwf = np.zeros(f.size)
     slope1 = np.where(f<=f_break)
     slope2 = np.where(f>f_break)
