@@ -91,7 +91,7 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
                 sp = params2[key]['param'+str(ii+1)].split(',')
                 print 'Parameter %d: %s' % (ii+1, sp[0])
                 print '\t%s Prior' % (sp[1])
-                print '\t%s Prior Params: %f %f' % (sp[1],float(sp[2]),float(sp[3]))
+                print '\t%s Prior Params: %s %s' % (sp[1],sp[2],sp[3])
     print '=================='
     print 'If you see anything wrong with this, stop it now!'
     print 'Starting in...'
@@ -128,8 +128,22 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
                 # sp = [name, prior type, x1, x2]
                 sp =\
                     params2[key]['param'+str(ii+1)].split(',')
-                cube[counter] = GeneralPrior(cube[counter], sp[1], float(sp[2]),
-                        float(sp[3]))
+                if sp[1][0] == 'U' and sp[2][:5]=='param' and sp[3][:5]=='param':
+                    subtract1 = int(key[-1]) - int(sp[2][-1])
+                    subtract2 = int(key[-1]) - int(sp[3][-1])
+                    cube[counter] =  GeneralPrior(cube[counter], 'U',
+                            cube[counter-subtract1], cube[counter-subtract2])
+                elif sp[1][0] == 'U' and sp[2][:5]=='param':
+                    subtract = int(key[-1]) - int(sp[2][-1])
+                    cube[counter] =  GeneralPrior(cube[counter], 'U',
+                            cube[counter-subtract], float(sp[3]))
+                elif sp[1][0] == 'U' and sp[3][:5]=='param':
+                    subtract = int(key[-1]) - int(sp[2][-1])
+                    cube[counter] =  GeneralPrior(cube[counter], 'U',
+                            float(sp[2]), cube[counter - subtract])
+                else:
+                    cube[counter] = GeneralPrior(cube[counter], sp[1], float(sp[2]),
+                            float(sp[3]))
                 counter += 1
 
     # define loglike
@@ -170,7 +184,7 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
     n_params = len(parameters)
     pymultinest.run(loglike, prior, n_params,
             outputfiles_basename=output_prefix,
-            resume=False, verbose=verbose, n_live_points=2000)
+            resume=False, verbose=verbose, n_live_points=1000)
     json.dump(parameters, open(output_prefix + 'params.json','w'))
     if params2 is not None:
         a = pymultinest.Analyzer(outputfiles_basename=output_prefix, n_params = n_params)
