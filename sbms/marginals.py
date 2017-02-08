@@ -11,11 +11,12 @@ from numpy import exp, log
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+from sbms.priors import add_prior
 import sys, os
 import json
 import pymultinest
 
-def marginals(prefix):
+def marginals(prefix, params):
     print('model "%s"' % prefix)
     parameters = json.load(open(prefix + 'params.json'))
     n_params = len(parameters)
@@ -60,51 +61,57 @@ def marginals(prefix):
             fig = plt.figure(figsize=(5*n_params, 5*n_params))
 
             # Loop across parameters, create 1D plot
-            for i in range(n_params):
+            counter = 0
+            for key in params.keys():
+                    for i in range(int(params[key]['nparams'])):
+                            par = params[key]['param'+str(i+1)]
+                            sp = par.split(',')
 
-                    ax1 = fig.add_subplot(n_params, n_params, n_params*i+(i+1))
-                    ax1.set_xlabel(parameters[i].replace('_','\_'))
-            
-                    # Get parameter statistics, set bounds to +/- 5sigma
-                    m = s['marginals'][i]
-            
-                    # Histogram posterior
-                    x,w,patches = ax1.hist(values[:,i], bins=nbins, edgecolor='black', color='mediumslateblue',\
-                            histtype='stepfilled', alpha=0.2,normed=True)
-                    ax1.set_ylim(0, x.max())
-            
-                    # y-value at which to place error-bar (1/20th of vertical extent)
-                    ylim = ax1.get_ylim()
-                    y = ylim[0] + 0.05*(ylim[1] - ylim[0])
+                            ax1 = fig.add_subplot(n_params, n_params, n_params*i+(i+1))
+                            ax1.set_xlabel(parameters[i].replace('_','\_'))
 
-                    # Place error-bar
-                    center = m['median']
-                    low1, high1 = m['1sigma']
-                    ax1.errorbar(x=center, y=y,
-                            xerr=numpy.transpose([[center - low1, high1 - center]]), 
-                            color='blue', linewidth=2, marker='s')
+                            # Get parameter statistics, set bounds to +/- 5sigma
+                            m = s['marginals'][i]
 
-                    # Axis formatting
-                    ax1.set_ylabel("PDF")
-                    #ax1.set_xlim(m['5sigma'])
-            
-                    # Loop across other parameters
-                    for j in range(i+1,n_params):
+                            # Histogram posterior
+                            x,w,patches = ax1.hist(values[:,i], bins=nbins, edgecolor='black', color='mediumslateblue',\
+                                    histtype='stepfilled', alpha=0.2,normed=True)
+                            if sp[2][:5] == 'param' or sp[3][:5]=='param':
+                                print('not printing prior...')
+                            else:
+                                add_prior(ax1,sp[1],float(sp[2]),float(sp[3]))
+                            ax1.set_ylim(0, x.max())
 
-                            # Set up 2D posterior plot
-                            ax2 = fig.add_subplot(n_params, n_params, n_params*j+(i+1),sharex=ax1)
-                            p.plot_conditional(i, j, cmap = 'Blues',
-                                    bins='log',)
+                            # y-value at which to place error-bar (1/20th of vertical extent)
+                            ylim = ax1.get_ylim()
+                            y = ylim[0] + 0.05*(ylim[1] - ylim[0])
 
-                            # Plot error bars for each mode
-                            for m in modes:
-                                    ax2.errorbar(x=m['mean'][i], y=m['mean'][j], xerr=m['sigma'][i],\
-                                            yerr=m['sigma'][j])
+                            # Place error-bar
+                            center = m['median']
+                            low1, high1 = m['1sigma']
+                            ax1.errorbar(x=center, y=y,
+                                    xerr=numpy.transpose([[center - low1, high1 - center]]),
+                                    color='blue', linewidth=2, marker='s')
 
-                            # Axes labels
-                            ax2.set_xlabel(parameters[i].replace('_','\_'))
-                            ax2.set_ylabel(parameters[j].replace('_','\_'))
+                            # Axis formatting
+                            ax1.set_ylabel("PDF")
+                            #ax1.set_xlim(m['5sigma'])
 
+                            # Loop across other parameters
+                            for j in range(i+1,n_params):
+
+                                    # Set up 2D posterior plot
+                                    ax2 = fig.add_subplot(n_params, n_params, n_params*j+(i+1),sharex=ax1)
+                                    p.plot_conditional(i, j, cmap = 'Blues', bins='log')
+
+                                    # Plot error bars for each mode
+                                    for m in modes:
+                                            ax2.errorbar(x=m['mean'][i], y=m['mean'][j], xerr=m['sigma'][i],\
+                                                    yerr=m['sigma'][j])
+
+                                    # Axes labels
+                                    ax2.set_xlabel(parameters[i].replace('_','\_'))
+                                    ax2.set_ylabel(parameters[j].replace('_','\_'))
             # Save figure
             plt.savefig(prefix + 'marg.pdf')
             plt.savefig(prefix + 'marg.png')
