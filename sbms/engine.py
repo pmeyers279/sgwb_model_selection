@@ -12,9 +12,9 @@ import pymultinest
 import json
 from sbms.models import omgwf, omgw_f_registry
 from sbms.models import power_law
-from sbms.io_sbms import read_ini
+from sbms.io_sbms import read_ini, create_kwargs_from_recovery_params
 from sbms.orfs import ORF
-from sbms.priors.priors import GeneralPrior
+from sbms.priors import GeneralPrior
 import optparse
 
 def parse_command_line():
@@ -43,6 +43,8 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
     # get params
     params = read_ini(injection_file)
     Omgw, sig2, f = omgwf(params)
+    # save this for later
+    frequencies = np.copy(f)
     np.random.seed(noise_seed)
     Omgw += np.random.randn(Omgw.size) * np.sqrt(sig2)
     if recovery_file=='noise':
@@ -65,10 +67,10 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
             alpha=0.3)
     ax1.set_yscale('log')
     ax1.set_xscale('log')
-    ax2 = ax1.twinx()
-    ax2.plot(f, (Omgw) / np.sqrt(sig2), label='$SNR$', linewidth=2,
-            alpha=0.3, color='red')
-    ax2.set_xlim(f.min(), f.max())
+#    ax2 = ax1.twinx()
+#    ax2.plot(f, (Omgw) / np.sqrt(sig2), label='$SNR$', linewidth=2,
+#            alpha=0.3, color='red')
+#    ax2.set_xlim(f.min(), f.max())
     plt.title('Broadband $\Omega_{gw}$ = %4.2e, SNR=%4.2f' % (Y_tot,
         Y_tot/sig_tot))
     plt.legend()
@@ -91,7 +93,7 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
                 sp = params2[key]['param'+str(ii+1)].split(',')
                 print 'Parameter %d: %s' % (ii+1, sp[0])
                 print '\t%s Prior' % (sp[1])
-                print '\t%s Prior Params: %f %f' % (sp[1],float(sp[2]),float(sp[3]))
+                print '\t%s Prior Params: %s %s' % (sp[1],sp[2],sp[3])
     print '=================='
     print 'If you see anything wrong with this, stop it now!'
     print 'Starting in...'
@@ -128,8 +130,22 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
                 # sp = [name, prior type, x1, x2]
                 sp =\
                     params2[key]['param'+str(ii+1)].split(',')
-                cube[counter] = GeneralPrior(cube[counter], sp[1], float(sp[2]),
-                        float(sp[3]))
+                if sp[1][0] == 'U' and sp[2][:5]=='param' and sp[3][:5]=='param':
+                    subtract1 = int(key[-1]) - int(sp[2][-1])
+                    subtract2 = int(key[-1]) - int(sp[3][-1])
+                    cube[counter] =  GeneralPrior(cube[counter], 'U',
+                            cube[counter-subtract1], cube[counter-subtract2])
+                elif sp[1][0] == 'U' and sp[2][:5]=='param':
+                    subtract = int(key[-1]) - int(sp[2][-1])
+                    cube[counter] =  GeneralPrior(cube[counter], 'U',
+                            cube[counter-subtract], float(sp[3]))
+                elif sp[1][0] == 'U' and sp[3][:5]=='param':
+                    subtract = int(key[-1]) - int(sp[2][-1])
+                    cube[counter] =  GeneralPrior(cube[counter], 'U',
+                            float(sp[2]), cube[counter - subtract])
+                else:
+                    cube[counter] = GeneralPrior(cube[counter], sp[1], float(sp[2]),
+                            float(sp[3]))
                 counter += 1
 
     # define loglike
@@ -162,16 +178,18 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
                 model = params2[key]['model_type']
                 nparams = int(params2[key]['nparams'])
                 args = [cube[i] for i in range(counter,counter+nparams)]
-                Y_temp,f = omgw_f_registry[model.replace('_',' ')](*args)
+                kwargs = create_kwargs_from_recovery_params(params2[key])
+                kwargs['frequencies'] = frequencies
+                Y_temp,f = omgw_f_registry[model.replace('_',' ')](*args,
+                        **kwargs)
                 Y_model += Y_temp
                 counter += nparams
         return -(np.sum((Y_model - Omgw)**2 / (2*sig2))) - 0.5*np.sum(np.log(2.*np.pi*sig2))
 
-    #parameters = ["omg_alpha1", "alpha1", "omg_alpha2","alpha2"]
     n_params = len(parameters)
     pymultinest.run(loglike, prior, n_params,
             outputfiles_basename=output_prefix,
-            resume=False, verbose=verbose, n_live_points=2000)
+            resume=False, verbose=verbose, n_live_points=1000)
     json.dump(parameters, open(output_prefix + 'params.json','w'))
     if params2 is not None:
         a = pymultinest.Analyzer(outputfiles_basename=output_prefix, n_params = n_params)
@@ -206,4 +224,5 @@ if __name__=="__main__":
     print 'RUNNING MULTINEST MARGINALS   '
     print '=============================='
     # run multinest marginals as well
-    marginals(params.output_pref)
+    params2 = read_ini(params.recovery_file)
+    marginals(params.output_pref, params2)

@@ -1,3 +1,6 @@
+from matplotlib import use
+use('agg')
+import matplotlib.pyplot as plt
 import numpy as np
 
 def GeneralPrior(r,PriorType,x1,x2):
@@ -12,7 +15,7 @@ def GeneralPrior(r,PriorType,x1,x2):
     elif PriorType=='JEFF':
         return JeffreysPrior(r,x1,x2)
     else:
-        print 'Unrecognised prior'
+#        print 'Unrecognised prior'
         return 1
 
 def DeltaFunctionPrior(r,x1,x2):
@@ -57,3 +60,10 @@ def JeffreysPrior(r,x1,x2):
         else:
             lx2=log(x2)
         return 1/(r*(lx2-lx1))
+
+def add_prior(ax, p, x1, x2):
+    vals = np.arange(1./1000,1,1./1000)
+    prior = []
+    for val in vals:
+         prior.append(GeneralPrior(val, p, x1, x2))
+    ax.hist(prior, bins=20, normed=True, histtype='step')

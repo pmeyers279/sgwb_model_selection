@@ -4,10 +4,20 @@ use('agg')
 import pymultinest
 from sbms.engine import engine
 from sbms.marginals import marginals
+from sbms.io_sbms import read_ini
 import json
 import optparse
 import numpy as np
 from jinja2 import Environment, PackageLoader
+"""
+This is an example script that runs the analysis 3 times:
+        We inject a broken power law each time and we recover it
+        using a broken power law recovery, a power law recovery,
+        and a noise model recovery.
+        This script is meant to be run on the Caltech computing cluster, where
+        the example files live in a home directory.
+THIS SCRIPT IS A WORKING EXAMPLE.
+"""
 
 
 def parse_command_line():
@@ -25,31 +35,44 @@ def parse_command_line():
 
 if __name__=="__main__":
     params = parse_command_line()
+    output_pref_pl_bpl = params.output_dir + 'broken_power_law_power_law'
     output_pref_bpl = params.output_dir + 'broken_power_law_'
     output_pref_pl = params.output_dir + 'power_law_'
     output_pref_noise = params.output_dir + 'noise_'
+    injection_file = 'examples/injection_pl_and_bpl.ini'
+
+    #example files directory
+    # edit this to fit your own needs
+    exdir = '/home/meyers/git_repos/sgwb_model_selection'
 
     seed = 12345
     # get evidences
     # run things
+    print 'Running broken power law and power law recovery'
+    print 'Results here: %s' % output_pref_pl_bpl
+    engine(injection_file,'examples/recovery_pl_and_bpl.ini',output_pref_pl_bpl, noise_seed=seed)
     print 'Running broken power law recovery'
     print 'Results here: %s' % output_pref_bpl
-    engine('examples/injection_broken_power_law.ini','examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
+    engine(injection_file,'examples/recovery_broken_power_law.ini',output_pref_bpl, noise_seed=seed)
     print 'Running power law recovery'
     print 'Results here: %s' % output_pref_pl
-    engine('examples/injection_broken_power_law.ini','examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
+    engine(injection_file,'examples/recovery_power_law.ini',output_pref_pl, noise_seed=seed)
     print 'Running noise recovery'
     print 'Results here: %s' % output_pref_noise
-    engine('examples/injection_broken_power_law.ini','noise',output_pref_noise, noise_seed=seed)
+    engine(injection_file,'noise',output_pref_noise, noise_seed=seed)
     print 'Done running Multinest'
     print 'Collecting output'
-    marginals(output_pref_pl)
-    marginals(output_pref_bpl)
-#    marginals(output_pref_noise)
+    marginals(output_pref_pl_bpl, read_ini('examples/recovery_pl_and_bpl.ini'))
+    marginals(output_pref_pl, read_ini('examples/recovery_power_law.ini'))
+    marginals(output_pref_bpl, read_ini('examples/recovery_broken_power_law.ini'))
 
+    pl_bpl_evidence = pymultinest.Analyzer(n_params = 6, outputfiles_basename = output_pref_pl_bpl).get_stats()['global evidence']
     bpl_evidence = pymultinest.Analyzer(n_params = 4, outputfiles_basename = output_pref_bpl).get_stats()['global evidence']
     pl_evidence = pymultinest.Analyzer(n_params = 2, outputfiles_basename = output_pref_pl).get_stats()['global evidence']
     noise_evidence = json.load(open(output_pref_noise + 'stats.json'))['global evidence']
+
+    print 'Broken power law and power law evidence'
+    print pl_bpl_evidence
 
     print 'Broken power law evidence'
     print bpl_evidence
@@ -59,6 +82,9 @@ if __name__=="__main__":
 
     print 'Noise law evidence'
     print noise_evidence
+
+    print 'log Bayes Factor of broken power law and power law to noise: '
+    print (pl_bpl_evidence - noise_evidence)
 
     print 'log Bayes Factor of broken power law to noise: '
     print (bpl_evidence - noise_evidence)
@@ -70,6 +96,7 @@ if __name__=="__main__":
     print  (pl_evidence - noise_evidence)
     print 'DONE!'
     results = {}
+    results['bpl_pl'] = {'evidence' : pl_bpl_evidence, 'marg' : output_pref_pl_bpl + 'marg.png', 'name':'Broken Power Law and Power Law'}
     results['bpl'] = {'evidence' : bpl_evidence, 'marg' : output_pref_bpl + 'marg.png', 'name':'Broken Power Law'}
     results['pl'] = {'evidence' : pl_evidence, 'marg' : output_pref_pl + 'marg.png', 'name':'Power Law'}
     results['noise'] = {'evidence' : noise_evidence, 'marg' : output_pref_noise + 'marg.png', 'name':'Noise'}

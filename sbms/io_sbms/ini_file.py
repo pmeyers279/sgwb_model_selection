@@ -44,3 +44,10 @@ def read_ini(file):
     dict1 = config_pipeline_ini(c)
     return dict1
 
+def create_kwargs_from_recovery_params(recovery_dict):
+    kdict = {}
+    for key in recovery_dict.keys():
+        if key[:-1]=='kparam':
+            sp = recovery_dict[key].split(',')
+            kdict[sp[0]] = sp[1]
+    return kdict
