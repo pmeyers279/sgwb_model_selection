@@ -1,10 +1,12 @@
 from .power_law import omega_gw_spectrum as pl_omgwf
 from ..noise import get_sigma_from_noise
 from .broken_power_law import omega_gw_spectrum as bpl_omgwf
+from .binary_black_hole import omega_gw_spectrum as ggh_omgwf
 
 # dict of omgw_f models
 omgw_f_registry = {'power law' : pl_omgwf,
-                   'broken power law' : bpl_omgwf}
+                   'broken power law' : bpl_omgwf,
+                   'binary black hole': bbh_omgwf}
 
 # get omega_gw(f) for some set of models
 # as specified in a parameter file
