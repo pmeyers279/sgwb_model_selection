@@ -189,7 +189,7 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
     n_params = len(parameters)
     pymultinest.run(loglike, prior, n_params,
             outputfiles_basename=output_prefix,
-            resume=False, verbose=verbose, n_live_points=1000)
+                    resume=False, verbose=verbose, n_live_points=98)
     json.dump(parameters, open(output_prefix + 'params.json','w'))
     if params2 is not None:
         a = pymultinest.Analyzer(outputfiles_basename=output_prefix, n_params = n_params)

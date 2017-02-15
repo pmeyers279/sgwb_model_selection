@@ -1,6 +1,10 @@
 import numpy as np
+import scipy as sp
+from constants import *
+from astrofunct import *
+import math
 
-def omega_gw_spectrum(M=8.7, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, df=0.25):
+def omega_gw_spectrum(M=1.5, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, df=0.25, sfr ='h', frequencies = None):
     """
     Parameters
     ---------
@@ -18,6 +22,8 @@ def omega_gw_spectrum(M=8.7, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, d
        high end of frequency spectrum
     df: 'float'
        frequency bin width
+    sfr: 'string'
+       star formation rate with options Hopkins and Beacom 2006('h'), Fardal 2007 ('f'), Wilken 2008 ('w'), Nagamine 2006 ('n'), Springel and Hernquist 2003 ('s'), Behroozi et. al 2013 ('b'), Kistler et al 2013 ('k'), Low Metallicity ('z')
     
      Returns                                                            
     -------                                                             
@@ -26,45 +32,15 @@ def omega_gw_spectrum(M=8.7, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, d
     f : `numpy.ndarray`                                                 
         frequency array                                                
     """
-    if isinstance(omg_ref, dict):
-    #unpack params
-    try:
-        flow = float(omg_ref['flow'])
-    except:
-        pass
-    try:
-        fhigh = float(omg_ref['fhigh'])
-    except:
-        pass
-    try:
-        df = float(omg_ref['df'])
-    except:
-        pass
-    try:
-        M = float(omg_ref['M'])
-    except:
-        print 'WARNING: Chirp mass not set, setting to 8.7'
-        pass
-    try:
-        lamb = float(omg_ref['lamb'])
-    except:
-        print 'WARNING: Mass fraction not set, setting it to 0.01'
-        pass
-    try:
-        eta = float(omg_ref['eta'])
-    except:
-        print 'WARNING: Mass ratio not set, setting it to 0.1'
-        pass
-    try:
-        zi = float(omg_ref['zi'])
-    except:
-        print 'WARNING: Spin Parameter not set, setting to 0.1'
-        pass
-        
-    f = np.arange(flow, fhigh+df, df)
+
+    #this follows the analysis in https://arxiv.org/abs/1104.3565
+
+    f = np.arange(float(flow),float(fhigh)+float(df),float(df))
+    if frequencies is not None:
+        f = frequencies
     omgwf = np.zeros(f.size)
     
-        Kb = (G*np.pi)**(2.0/3.0)*(M*Msolar)**(5.0/3)/3
+    Kb = (G*np.pi)**(2.0/3.0)*(M*Msolar)**(5.0/3)/3
 
     Const = (8*np.pi*G)/(3*c**2*H0**3)*lamb*Kb/yr/Mpc**3
 
@@ -75,6 +51,8 @@ def omega_gw_spectrum(M=8.7, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, d
     fgmin = 0.0
     #fgmax = v3 #maximum frequency
 
+    v_ = lambda f: (np.pi*Mtot*f*LAL_MTSUN_SI)**(1.0/3.0)
+
     #calulating total mass of black hole
     M = float(M)
     root = (0.25-eta)**(1.0/2.0)#eta cannot be more than 0.25
@@ -83,6 +61,8 @@ def omega_gw_spectrum(M=8.7, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, d
     m2 = (M*(1+fraction)**0.2)/fraction**0.6
     m1 = (M*(1+invfraction)**0.2)/invfraction**0.6
     Mtot = m1 + m2
+    
+    v_ = lambda f: (np.pi*Mtot*f*LAL_MTSUN_SI)**(1.0/3.0)
 
     v1 = lambda z: (404*(0.66389*eta**2 - 0.10321*eta + 0.10979)/0.125481)*(20.0/Mtot)/(1+z);
     v2 = lambda z: (807*(1.3278*eta**2 - 0.20642*eta + 0.21957)/0.250953)*(20.0/Mtot)/(1+z);
@@ -94,3 +74,89 @@ def omega_gw_spectrum(M=8.7, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, d
 
     w1 =lambda v1, mod1, mod2:(1 / v1) * (mod1 / mod2)
     w2 = lambda v1, v2, mod1:(1 / v1)*(1/v2**(4.0/3.0))*mod1
+
+    def getv(z, f):
+        v = 0
+        v__ = v_(f)
+        v1_ = v1(z)
+        v2_ = v2(z)
+        v3_ = v3(z)
+        sigma_ = sigma(z)
+        mod1_ = mod1(v__)
+        mod2_ = mod2(v__)
+        w1_ = w1(v1_, mod1_, mod2_)
+        w2_ = w2(v1_, v2_, mod1_)
+        if f >=  fgmin and f <= v3_:
+            if 0 < f and f < v1_:
+                v = f**(-1.0/3.0)*mod1_
+            elif v1_ <= f and f <= v2_:
+                v = f**(2.0/3.0)*w1_*mod2_
+            else: # v2 < f[x]  and f[x] < v3:
+                v = f**2.0*w2_/(1+ 4*(f-v2_)**2/sigma_**2)**2
+        return v
+
+    if sfr != 'z':
+        integrand = lambda z,f: getv(z, f)/Ez(OmegaM, OmegaV, z)/(1+z)**(1.0/3.0)
+        zrange = np.arange(zmin, zmax+0.1, 0.1)
+        rates = []
+        for zval in zrange:
+            rates.append(BC_rate(zval, tmin, sfr))
+        for x in range(len(f)):
+            zrange2 = np.arange(zmin, zmax+0.01, 0.01)
+            vals = []
+            for index,zval in enumerate(zrange2):
+                val1 = np.interp(zval, zrange, rates)
+                vals.append(integrand(zval, f[x])*val1)
+            val = np.sum(vals) * 0.01
+            omgwf[x] = Const*f[x]* val
+    else:
+        lines = []
+        zvalues = []
+        sfrs = []
+        fil = open('EfficiencyZ_2.txt')
+        for line in fil.readlines():
+            lines.append(line.strip().split('\t'))
+        for element in lines:
+            zvalues.append(float(element[0]))
+            sfrs.append(star_form_rate('k', float(element[0]))* float(element[1]))
+        fil.close()
+        rate = lambda z:BC_rate(z, tmin, sfr, zvalues, sfrs)
+        integrand_part = lambda z,f: getv(z,f)/Ez(OmegaM, OmegaV, z)/(1+z)**(1.0/3.0)
+        zrange = np.arange(zmin, zmax+0.01, 0.01)
+        rates = []
+        for zval in zrange:
+            rates.append(rate(zval)) 
+        for x in range(len(f)):
+            vals = []
+            for index,zval in enumerate(zrange):
+                vals.append(integrand_part(zval, f[x])*rates[index])
+            val = np.sum(vals) * 0.01
+            omgwf[x] = Const*f[x]* val
+    
+    if sfr != 'b':
+        return omgwf, f
+    else:
+        omega1 = np.array(len(f)*[0], float)
+        integrand1 = lambda z, f: getv(z,f)/Ez(OmegaM, OmegaV, z)/(1+z)**(1.0/3.0)
+        zrange = np.arange(zmin, zmax+0.1, 0.1)
+        rates = []
+        for zval in zrange:
+            rates.append(BC_rate(zval, tmin, '3'))
+        for x in range(len(f)):
+            zrange2 = np.arange(zmin, zmax+0.01, 0.01)
+            vals = []
+            for index,zval in enumerate(zrange2):
+                val1 = np.interp(zval, zrange, rates)
+                vals.append(integrand(zval, f[x])*val1)
+            val = np.sum(vals) * 0.01
+            omega1[x]=Const*f[x]*val
+            omgwf[x] = omgwf[x] + omega1[x]
+        return omgwf,f
+
+def unpack_dict(param_dict):
+    kwargs = {}
+    args = []
+    for key in param_dict.keys():
+        if key != 'frequencies':
+            param_dict[key] = float(param_dict[key])
+    return args, param_dict

@@ -3,6 +3,7 @@ from sbms.engine import engine
 from sbms.marginals import marginals
 import os
 import optparse
+from sbms.io_sbms import read_ini
 
 def parse_command_line():
     """
@@ -40,4 +41,5 @@ if __name__=="__main__":
         print 'RUNNING MULTINEST MARGINALS   '
         print '=============================='
         # run multinest marginals as well
-        marginals(params.output_pref)
+        params2 = read_ini(params.recovery_file)
+        marginals(params.output_pref, params2)

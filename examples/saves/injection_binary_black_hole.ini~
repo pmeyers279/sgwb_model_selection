@@ -1,0 +1,11 @@
+[noise]
+noise_str=/home/fitzaxen/sgwb_model_selection/examples/asd.txt
+spectrum_type=asd
+Tobs=1
+
+[binary black hole_1]
+M = 1.0
+lamb=0.02
+eta=0.05
+zi=0.05
+sfr='n'
