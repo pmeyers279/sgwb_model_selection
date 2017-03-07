@@ -3,17 +3,18 @@ import scipy as sp
 from constants import *
 from astrofunct import *
 import math
+from operator import *
 
-def omega_gw_spectrum(M=1.5, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, df=0.25, sfr ='h', frequencies = None):
+def omega_gw_spectrum(M=10.0, lamb= 1e-6,eta=0.1, zi=0.0, flow = 20, fhigh=100, df=0.25, sfr ='h', frequencies = None):
     """
     Parameters
     ---------
     M: 'float'
-       chirp mass, in solar masses [1, 2.5]
+       chirp mass, in solar masses [2.5, 20]
     lamb: 'float'
        mass fraction, in solar masses [0, .1]
     eta: 'float'
-       mass ratio [0, 0.25]
+       mass ratio (0, 0.25]
     zi: 'float'
        spin parameter [-0.85, 0.85]
     flow: 'float'
@@ -95,21 +96,18 @@ def omega_gw_spectrum(M=1.5, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, d
                 v = f**2.0*w2_/(1+ 4*(f-v2_)**2/sigma_**2)**2
         return v
 
-    if sfr != 'z':
+    if sfr != "z":
+         
         integrand = lambda z,f: getv(z, f)/Ez(OmegaM, OmegaV, z)/(1+z)**(1.0/3.0)
         zrange = np.arange(zmin, zmax+0.1, 0.1)
-        rates = []
-        for zval in zrange:
-            rates.append(BC_rate(zval, tmin, sfr))
-        for x in range(len(f)):
-            zrange2 = np.arange(zmin, zmax+0.01, 0.01)
-            vals = []
-            for index,zval in enumerate(zrange2):
-                val1 = np.interp(zval, zrange, rates)
-                vals.append(integrand(zval, f[x])*val1)
-            val = np.sum(vals) * 0.01
-            omgwf[x] = Const*f[x]* val
+        rates = map(lambda zval: BC_rate(zval,tmin,sfr) ,zrange)
+        zrange2 = np.arange(zmin, zmax+0.01, 0.01)
+        vfunc = np.vectorize(lambda zval,x: np.interp(zval, zrange, rates)*integrand(zval, x))
+        vfunc2 = np.vectorize(lambda x: sum(vfunc(zrange2, x))*0.01*Const*x)
+        omgwf = vfunc2(f);
+
     else:
+       
         lines = []
         zvalues = []
         sfrs = []
@@ -133,24 +131,17 @@ def omega_gw_spectrum(M=1.5, lamb= 0.01,eta=0.1, zi=0.1, flow = 20, fhigh=100, d
             val = np.sum(vals) * 0.01
             omgwf[x] = Const*f[x]* val
     
-    if sfr != 'b':
+    if sfr != "b":
         return omgwf, f
     else:
-        omega1 = np.array(len(f)*[0], float)
-        integrand1 = lambda z, f: getv(z,f)/Ez(OmegaM, OmegaV, z)/(1+z)**(1.0/3.0)
         zrange = np.arange(zmin, zmax+0.1, 0.1)
-        rates = []
-        for zval in zrange:
-            rates.append(BC_rate(zval, tmin, '3'))
-        for x in range(len(f)):
-            zrange2 = np.arange(zmin, zmax+0.01, 0.01)
-            vals = []
-            for index,zval in enumerate(zrange2):
-                val1 = np.interp(zval, zrange, rates)
-                vals.append(integrand(zval, f[x])*val1)
-            val = np.sum(vals) * 0.01
-            omega1[x]=Const*f[x]*val
-            omgwf[x] = omgwf[x] + omega1[x]
+        rates = map(lambda zval: BC_rate(zval,tmin,'3') ,zrange)
+        zrange2 = np.arange(zmin, zmax+0.01, 0.01)
+        vfunc = np.vectorize(lambda zval,x: np.interp(zval, zrange, rates)*integrand(zval, x))
+        vfunc2 = np.vectorize(lambda x: sum(vfunc(zrange2, x))*0.01*Const*x)
+        omega1 = vfunc2(f);
+        omgwf = map(add, omgwf, omega1)
+
         return omgwf,f
 
 def unpack_dict(param_dict):
