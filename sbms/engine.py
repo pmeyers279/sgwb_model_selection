@@ -42,11 +42,18 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
         verbose=False, noise_seed=None):
     # get params
     params = read_ini(injection_file)
+    keys = params.keys()
+    add_random_noise=True
+    for key in keys:
+        if key=='data':
+            add_random_noise=False
+
     Omgw, sig2, f = omgwf(params)
     # save this for later
     frequencies = np.copy(f)
     np.random.seed(noise_seed)
-    Omgw += np.random.randn(Omgw.size) * np.sqrt(sig2)
+    if add_random_noise:
+        Omgw += np.random.randn(Omgw.size) * np.sqrt(sig2)
     if recovery_file=='noise':
         print 'RECOVERING WITH NOISE'
         params2=None
@@ -67,10 +74,6 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
             alpha=0.3)
     ax1.set_yscale('log')
     ax1.set_xscale('log')
-#    ax2 = ax1.twinx()
-#    ax2.plot(f, (Omgw) / np.sqrt(sig2), label='$SNR$', linewidth=2,
-#            alpha=0.3, color='red')
-#    ax2.set_xlim(f.min(), f.max())
     plt.title('Broadband $\Omega_{gw}$ = %4.2e, SNR=%4.2f' % (Y_tot,
         Y_tot/sig_tot))
     plt.legend()
@@ -191,7 +194,7 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
             outputfiles_basename=output_prefix,
             resume=False, verbose=verbose, n_live_points=1000)
     json.dump(parameters, open(output_prefix + 'params.json','w'))
-    if params2 is not None:
+    if params2 is not None and recovery_file is not 'noise':
         a = pymultinest.Analyzer(outputfiles_basename=output_prefix, n_params = n_params)
         a_lnZ = a.get_stats()['global evidence']
         print

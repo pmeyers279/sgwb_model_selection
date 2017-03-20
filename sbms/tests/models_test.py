@@ -6,7 +6,6 @@ import numpy as np
 
 class TestModel(unittest.TestCase):
     def test_power_law(self):
-        params = read_ini('sbms/tests/data/test_ini.ini')
         omgw_f,f = power_law.omega_gw_spectrum(-9, alpha=0)
         npt.assert_array_almost_equal(omgw_f, 1e-9*np.ones(omgw_f.size))
     def test_broken_power_law(self):
