@@ -4,8 +4,10 @@ from .broken_power_law import omega_gw_spectrum as bpl_omgwf
 from .broken_power_law import unpack_dict as bpl_params
 from .comb import omega_gw_spectrum as comb_omgwf
 from .comb import unpack_dict as comb_params
-import numpy as np
+from .simple_line import omega_gw_spectrum as sl_omgwf
+from .simple_line import unpack_dict as sl_params
 from ..noise import get_sigma_from_noise
+import numpy as np
 
 # dict of omgw_f models
 omgw_f_registry = {'power law' : pl_omgwf,
@@ -14,7 +16,7 @@ omgw_f_registry = {'power law' : pl_omgwf,
 param_registry = {'power law' : pl_params,
                   'broken power law' : bpl_params,
                   'comb' : comb_params}
-
+                  'simple line' : sl_omgwf}
 # get omega_gw(f) for some set of models
 # as specified in a parameter file
 def omgwf(params):
