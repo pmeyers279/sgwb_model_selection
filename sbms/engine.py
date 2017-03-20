@@ -46,7 +46,15 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
     # save this for later
     frequencies = np.copy(f)
     np.random.seed(noise_seed)
-    Omgw += np.random.randn(Omgw.size) * np.sqrt(sig2)
+    isRealData = False
+    # check if we're using real data
+    for key in params.keys():
+        if key=='data':
+            isRealData = True
+            break
+    # if not, then add some extra noise
+    if not isRealData:
+        Omgw += np.random.randn(Omgw.size) * np.sqrt(sig2)
     if recovery_file=='noise':
         print 'RECOVERING WITH NOISE'
         params2=None
@@ -189,7 +197,7 @@ def engine(injection_file, recovery_file, output_prefix='./multinest_files_',
     n_params = len(parameters)
     pymultinest.run(loglike, prior, n_params,
             outputfiles_basename=output_prefix,
-            resume=False, verbose=verbose, n_live_points=1000)
+            resume=False, verbose=verbose, n_live_points=2000)
     json.dump(parameters, open(output_prefix + 'params.json','w'))
     if params2 is not None:
         a = pymultinest.Analyzer(outputfiles_basename=output_prefix, n_params = n_params)
