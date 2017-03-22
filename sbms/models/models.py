@@ -6,6 +6,8 @@ from .simple_line import omega_gw_spectrum as sl_omgwf
 from .simple_line import unpack_dict as sl_params
 from .binary_black_hole import omega_gw_spectrum as bbh_omgwf
 from .binary_black_hole import unpack_dict as bbh_params
+from .binary_neutron_star import omega_gw_spectrum as bns_omgwf
+from .binary_neutron_star import unpack_dict as bns_params
 from ..noise import get_sigma_from_noise
 import numpy as np
 from ..noise import get_sigma_from_noise
@@ -14,11 +16,13 @@ from ..noise import get_sigma_from_noise
 omgw_f_registry = {'power law' : pl_omgwf,
                    'broken power law' : bpl_omgwf,
                    'simple line' : sl_omgwf,
-                   'binary black hole': bbh_omgwf}
+                   'binary black hole': bbh_omgwf,
+                   'binary neutron star':bns_omgwf}
 param_registry = {'power law' : pl_params,
                   'broken power law' : bpl_params,
                   'simple line' : sl_params,
-                  'binary black hole' : bbh_params}
+                  'binary black hole' : bbh_params,
+                  'binary neutron star': bns_params}
 
 # get omega_gw(f) for some set of models
 # as specified in a parameter file
