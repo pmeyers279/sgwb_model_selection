@@ -48,10 +48,10 @@ def omega_gw_spectrum(kappa_amp=2, beta_amp=2.67, kappa_ang=0.25, beta_ang=1.74,
     Omgw = np.zeros(f.size)
     H_amp = kappa_amp**2 * M_f * (1e-46) * (f/10)**(-2*beta_amp)
     H_ang = kappa_ang**2 * M_f * (1e-46) * (f/10)**(-2*beta_ang)
-    T,V,S = ORF(f)
+    #T,V,S = ORF(f)
     H0_s = cosmology.WMAP9.H0.to(units.s**-1).value
-    Omgw += H_amp * (f)**(3) * (10 * np.pi**2) / (3 * np.abs(T) * H0_s**2)
-    Omgw += H_ang * (f)**(3) * (10 * np.pi**2) / (3 * np.abs(T) * H0_s**2)
+    Omgw += H_amp * (f)**(3) * (2 * np.pi**2) / (3 * H0_s**2)
+    Omgw += H_ang * (f)**(3) * (2 * np.pi**2) / (3 * H0_s**2)
     return Omgw, f
 
 def unpack_dict(param_dict):
