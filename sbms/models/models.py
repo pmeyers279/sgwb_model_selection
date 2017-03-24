@@ -12,11 +12,12 @@ import numpy as np
 # dict of omgw_f models
 omgw_f_registry = {'power law' : pl_omgwf,
                    'broken power law' : bpl_omgwf,
-                   'comb' : comb_omgwf}
+                   'comb' : comb_omgwf,
+                   'simple line' : sl_omgwf}
 param_registry = {'power law' : pl_params,
                   'broken power law' : bpl_params,
-                  'comb' : comb_params}
-                  'simple line' : sl_omgwf}
+                  'comb' : comb_params,
+                  'simple line' : sl_params}
 # get omega_gw(f) for some set of models
 # as specified in a parameter file
 def omgwf(params):

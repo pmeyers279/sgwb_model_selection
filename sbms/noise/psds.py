@@ -1,18 +1,21 @@
 import os
 import numpy as np
 from scipy.interpolate import interp1d
+from ..orfs import ORF
 
 H0 = 2.2685e-18
 
 def get_sigma_from_noise(Tobs, noise_curve_string, outfs=None,
         format='lal',type='asd'):
 
+
     Tobs *= 24 * 365 * 3600
     norm = (10.*np.pi**2.)/(3.*H0**2.)
-    f, psd = get_noise_psd(noise_curve_string, outfs=outfs, format=format,
-            type=type)
+    f, psd = get_noise_psd(noise_curve_string, outfs=outfs, format=format, type=type)
+
+    torf, vorf, sorf = ORF(f)
     df = f[1] - f[0]
-    sigma2s = np.power(norm,2.)*(1./(2.*Tobs*df))*np.power(f,6.)*np.power(psd,2.)
+    sigma2s = np.power(norm,2.)*(1./(2.*Tobs*df*np.abs(torf)**2))*np.power(f,6.)*np.power(psd,2.)
     return sigma2s
 
 def get_noise_psd(noise_curve_string, outfs=None,
@@ -42,8 +45,6 @@ def get_noise_psd(noise_curve_string, outfs=None,
     -------
     freqs : `numpy.ndarray` (if 'psd')
         frequencies
-    times : `numpy.ndarray` (if 'ts')
-        times
     noise : `numpy.ndarray`
         noise values
     """
