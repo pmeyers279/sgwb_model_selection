@@ -1,0 +1,9 @@
+[1]
+model_type=binary_black_hole
+nparams=4
+;; 'name', 'prior type', 'inputs'
+param1=M,U,1,1.1
+param2=lamb,U,0,0.1
+param3=eta,U,0,0.25
+param4=zi,U,0, 0.2
+ 

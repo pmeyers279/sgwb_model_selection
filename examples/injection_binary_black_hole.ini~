@@ -1,0 +1,13 @@
+[noise]
+noise_str=/home/margot.fitz-axen/sgwb_model_selection/examples/asd.txt
+spectrum_type=asd
+Tobs=1
+
+[binary black hole_1]
+M = 1.0
+lamb=0.0
+eta=0.0
+zi=0.0
+df = 1.0
+flow = 20
+fhigh = 30

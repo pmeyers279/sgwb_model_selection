@@ -1,0 +1,5 @@
+[1]
+model_type=binary_black_hole
+nparams=5
+;; 'name', 'prior type', 'inputs'
+param1= ,U, 
