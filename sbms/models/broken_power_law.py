@@ -1,6 +1,6 @@
 import numpy as np
 
-def omega_gw_spectrum(omg_ref,f_break=50,alpha1=3,alpha2=-3, flow=20,
+def omega_gw_spectrum(omg_ref=0,f_break=50,alpha1=3,alpha2=-3, flow=20,
         fhigh=100, df=0.25, frequencies=None):
     """
     Parameters

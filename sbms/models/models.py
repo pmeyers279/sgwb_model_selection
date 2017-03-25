@@ -11,6 +11,8 @@ from .binary_black_hole import unpack_dict as bbh_params
 from .binary_neutron_star import omega_gw_spectrum as bns_omgwf
 from .binary_neutron_star import unpack_dict as bns_params
 from ..noise import get_sigma_from_noise
+from .schumann import omega_gw_spectrum as schumann_omgwf
+from .schumann import unpack_dict as schumann_params
 import numpy as np
 
 # dict of omgw_f models
@@ -19,15 +21,15 @@ omgw_f_registry = {'power law' : pl_omgwf,
                    'simple line' : sl_omgwf,
                    'binary black hole': bbh_omgwf,
                    'binary neutron star':bns_omgwf,
-                   'comb' : comb_omgwf}
+                   'comb' : comb_omgwf,
+                   'schumann': schumann_omgwf}
 param_registry = {'power law' : pl_params,
                   'broken power law' : bpl_params,
                   'simple line' : sl_params,
                   'binary black hole' : bbh_params,
                   'binary neutron star': bns_params,
-                  'comb': comb_params}
-
-
+                  'comb': comb_params,
+                  'schumann': schumann_params}
 # get omega_gw(f) for some set of models
 # as specified in a parameter file
 def omgwf(params):

@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
 
-def omega_gw_spectrum(comb_height, offset=0.5, separation=0.5, flow=20, fhigh=100,
+def omega_gw_spectrum(comb_height=0, offset=0.5, separation=0.5, flow=20, fhigh=100,
         df=0.25, frequencies=None, decimals=5):
     """
     Parameters
