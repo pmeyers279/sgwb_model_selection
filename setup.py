@@ -52,6 +52,11 @@ packagenames = find_packages(exclude=['utils'])
 
 # find all scripts
 scripts = glob.glob('bin/*')
+import unittest
+def my_test_suite():
+    test_loader = unittest.TestLoader()
+    test_suite = test_loader.discover('sbms/tests', pattern='*test.py')
+    return test_suite
 
 setup(name=PACKAGENAME,
       version=VERSION,
@@ -66,6 +71,6 @@ setup(name=PACKAGENAME,
       license=LICENSE,
       long_description=LONG_DESCRIPTION,
       zip_safe=False,
-      test_suite='sbms.tests',
+      test_suite='setup.my_test_suite',
       use_2to3=True
       )

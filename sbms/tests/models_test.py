@@ -2,8 +2,8 @@ import unittest
 from matplotlib import use
 use('agg')
 import matplotlib.pyplot as plt
-from ..io_sbms import read_ini
-from ..models import schumann, power_law, broken_power_law
+from sbms.io_sbms import read_ini
+from sbms.models import schumann, power_law, broken_power_law
 import numpy.testing as npt
 import numpy as np
 
